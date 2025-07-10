@@ -18,7 +18,9 @@ function connectDB($server, $database, $user, $password) {
             "Database" => $database,
             "UID" => $user,
             "PWD" => $password,
-            "TrustServerCertificate" => true // <--- เพิ่มบรรทัดนี้เข้ามา
+            "TrustServerCertificate" => true,
+            "Encrypt" => "Mandatory",           // <--- เพิ่มบรรทัดที่ 1
+            "SSLCipher" => "DEFAULT@SECLEVEL=1" // <--- เพิ่มบรรทัดที่ 2
         );
         $conn = sqlsrv_connect($server, $connectionInfo);
 
