@@ -1,16 +1,23 @@
-# --- Dockerfile สำหรับโปรเจกต์ PHP บน Render ---
+# --- Dockerfile ที่แก้ไขแล้วสำหรับ PHP + MS SQL Server บน Render ---
 
-# 1. ระบุ Environment พื้นฐาน: ใช้ Official PHP image ที่มี Apache ติดตั้งมาให้
-# คุณสามารถเปลี่ยนเวอร์ชันได้ตามต้องการ เช่น php:8.3-apache
+# 1. ระบุ Environment พื้นฐาน
 FROM php:8.2-apache
 
-# 2. คัดลอกไฟล์ทั้งหมดในโปรเจกต์ของเรา ไปใส่ในโฟลเดอร์ของเว็บเซิร์ฟเวอร์
-# Source (ซ้าย) คือโปรเจกต์ของเรา, Destination (ขวา) คือ /var/www/html/ ใน container
+# 2. ติดตั้ง Dependencies ที่จำเป็นสำหรับ MS SQL Driver ก่อน
+# เราต้องติดตั้งเครื่องมือพื้นฐานและไดรเวอร์ ODBC ของ Microsoft
+RUN apt-get update && apt-get install -y \
+    gnupg \
+    lsb-release \
+    curl \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev
+
+# 3. ติดตั้ง PHP Extensions สำหรับ MS SQL Server
+# เราต้องติดตั้งทั้ง pdo_sqlsrv และ sqlsrv
+RUN pecl install pdo_sqlsrv sqlsrv \
+    && docker-php-ext-enable pdo_sqlsrv sqlsrv
+
+# 4. คัดลอกไฟล์โปรเจกต์ของเราไปใส่ในเว็บเซิร์ฟเวอร์
 COPY . /var/www/html/
-
-# 3. (ถ้าจำเป็น) ติดตั้ง extensions ของ PHP ที่ต้องใช้เพิ่มเติม
-# จากชื่อไฟล์ของคุณ (conn.php) เดาว่าต้องใช้ mysqli เพื่อเชื่อมต่อฐานข้อมูล
-# บรรทัดนี้จะติดตั้ง mysqli ให้โดยอัตโนมัติ
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
-
-# ไม่ต้องมีคำสั่งอื่นเพิ่มเติม Apache จะเริ่มทำงานเองโดยอัตโนมัติ
