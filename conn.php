@@ -12,15 +12,14 @@ $userCB = 'sa';
 $passwordCB = ''; // รหัสผ่านว่าง
 
 // ฟังก์ชันสำหรับสร้างการเชื่อมต่อฐานข้อมูล
+// ฟังก์ชันสำหรับสร้างการเชื่อมต่อฐานข้อมูล (ฉบับแก้ไขล่าสุด)
 function connectDB($server, $database, $user, $password) {
     try {
         $connectionInfo = array(
             "Database" => $database,
             "UID" => $user,
             "PWD" => $password,
-            "TrustServerCertificate" => true,
-            "Encrypt" => "Mandatory",           // <--- เพิ่มบรรทัดที่ 1
-            "SSLCipher" => "DEFAULT@SECLEVEL=1" // <--- เพิ่มบรรทัดที่ 2
+            "TrustServerCertificate" => true
         );
         $conn = sqlsrv_connect($server, $connectionInfo);
 
