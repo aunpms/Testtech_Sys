@@ -1,0 +1,22 @@
+/* Custom styles for A-Unit HR application */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.table thead th {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Add any other global styles you need here */
