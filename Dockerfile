@@ -1,4 +1,4 @@
-# --- Dockerfile ที่แก้ไขล่าสุดสำหรับ PHP + MS SQL Server ---
+# --- Dockerfile ที่แก้ไขล่าสุดและแน่นอนที่สุด ---
 
 # 1. ระบุ Environment พื้นฐาน
 FROM php:8.2-apache
@@ -17,9 +17,10 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install pdo_sqlsrv sqlsrv \
     && docker-php-ext-enable pdo_sqlsrv sqlsrv
 
-# 4. (เพิ่มขั้นตอนนี้) ปรับลดนโยบายความปลอดภัยของ OpenSSL
-# เพื่อให้ยอมรับการเข้ารหัสแบบเก่าจาก SQL Server ได้
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+# 4. (สำคัญ) บังคับแก้ไขไฟล์คอนฟิกของ OpenSSL โดยตรง
+# วิธีนี้จะเพิ่มการตั้งค่าที่จำเป็นเข้าไปท้ายไฟล์ ซึ่งแน่นอนกว่าการค้นหาและแทนที่
+RUN echo "[system_default_sect]" >> /etc/ssl/openssl.cnf \
+    && echo "CipherString = DEFAULT@SECLEVEL=1" >> /etc/ssl/openssl.cnf
 
 # 5. คัดลอกไฟล์โปรเจกต์ของเราไปใส่ในเว็บเซิร์ฟเวอร์
 COPY . /var/www/html/
