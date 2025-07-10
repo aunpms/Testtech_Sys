@@ -1,10 +1,9 @@
-# --- Dockerfile ที่แก้ไขแล้วสำหรับ PHP + MS SQL Server บน Render ---
+# --- Dockerfile ที่แก้ไขล่าสุดสำหรับ PHP + MS SQL Server ---
 
 # 1. ระบุ Environment พื้นฐาน
 FROM php:8.2-apache
 
-# 2. ติดตั้ง Dependencies ที่จำเป็นสำหรับ MS SQL Driver ก่อน
-# เราต้องติดตั้งเครื่องมือพื้นฐานและไดรเวอร์ ODBC ของ Microsoft
+# 2. ติดตั้ง Dependencies ที่จำเป็นสำหรับ MS SQL Driver
 RUN apt-get update && apt-get install -y \
     gnupg \
     lsb-release \
@@ -15,9 +14,12 @@ RUN apt-get update && apt-get install -y \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev
 
 # 3. ติดตั้ง PHP Extensions สำหรับ MS SQL Server
-# เราต้องติดตั้งทั้ง pdo_sqlsrv และ sqlsrv
 RUN pecl install pdo_sqlsrv sqlsrv \
     && docker-php-ext-enable pdo_sqlsrv sqlsrv
 
-# 4. คัดลอกไฟล์โปรเจกต์ของเราไปใส่ในเว็บเซิร์ฟเวอร์
+# 4. (เพิ่มขั้นตอนนี้) ปรับลดนโยบายความปลอดภัยของ OpenSSL
+# เพื่อให้ยอมรับการเข้ารหัสแบบเก่าจาก SQL Server ได้
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+
+# 5. คัดลอกไฟล์โปรเจกต์ของเราไปใส่ในเว็บเซิร์ฟเวอร์
 COPY . /var/www/html/
